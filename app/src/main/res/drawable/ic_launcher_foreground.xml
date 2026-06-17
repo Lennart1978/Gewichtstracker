@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Outer platform highlight / borders -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M24,28 h60 a8,8 0 0 1 8,8 v44 a8,8 0 0 1 -8,8 h-60 a8,8 0 0 1 -8,-8 v-44 a8,8 0 0 1 8,-8 z" />
+        
+    <!-- Main scale platform body -->
+    <path
+        android:fillColor="#F8FAFC"
+        android:pathData="M26,30 h56 a6,6 0 0 1 6,6 v40 a6,6 0 0 1 -6,6 h-56 a6,6 0 0 1 -6,-6 v-40 a6,6 0 0 1 6,-6 z" />
+
+    <!-- Center vertical stripe accent -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M52,36 h4 v38 h-4 z" />
+        
+    <!-- Scale Screen/Dial window background -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M40,36 h28 a2,2 0 0 1 2,2 v12 a2,2 0 0 1 -2,2 h-28 a2,2 0 0 1 -2,-2 v-12 a2,2 0 0 1 2,-2 z" />
+        
+    <!-- Dial reading (LED weights indicators) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M44,41 h3 v3 h-3 z M49,41 h3 v3 h-3 z M54,41 h4 v3 h-4 z" />
+        
+    <!-- Standing foot guide left -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M31,48 h5 v18 h-5 z" />
+
+    <!-- Standing foot guide right -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M72,48 h5 v18 h-5 z" />
+
+    <!-- Trend Arrow overlay (representing weight loss progress) -->
+    <path
+        android:fillColor="#3B82F6"
+        android:pathData="M50,56 l8,8 l-4,0 l0,10 l-8,0 l0,-10 l-4,0 z" />
+</vector>

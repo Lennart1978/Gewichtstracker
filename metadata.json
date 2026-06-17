@@ -1,0 +1,6 @@
+{
+  "name": "Gewichtstracker",
+  "description": "Protokolliere dein tägliches Gewicht, setze dir ein Wunschgewicht und verfolge deinen Fortschritt in einem übersichtlichen Diagramm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
