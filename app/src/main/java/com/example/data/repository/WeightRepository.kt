@@ -32,4 +32,9 @@ class WeightRepository(private val weightDao: WeightDao) {
     suspend fun getWeightGoalDirect(): WeightGoal? {
         return weightDao.getWeightGoal()
     }
+
+    suspend fun clearAllData() {
+        weightDao.deleteAllWeightEntries()
+        weightDao.deleteWeightGoal()
+    }
 }

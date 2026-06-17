@@ -31,4 +31,10 @@ interface WeightDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWeightGoal(goal: WeightGoal)
+
+    @Query("DELETE FROM weight_entries")
+    suspend fun deleteAllWeightEntries()
+
+    @Query("DELETE FROM weight_goal")
+    suspend fun deleteWeightGoal()
 }

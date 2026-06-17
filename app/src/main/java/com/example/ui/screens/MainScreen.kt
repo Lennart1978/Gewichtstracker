@@ -152,8 +152,9 @@ fun MainScreen(viewModel: WeightViewModel) {
             if (goal == null) {
                 // Onboarding State: Set Goal and Start Weights
                 OnboardingView(
-                    onSaveGoal = { gW, sW, dateVal ->
+                    onSaveGoal = { gW, sW, dateVal, height ->
                         viewModel.setWeightGoal(gW, sW, dateVal)
+                        viewModel.saveHeight(height)
                     },
                     modifier = Modifier.fillMaxSize()
                 )
@@ -191,6 +192,10 @@ fun MainScreen(viewModel: WeightViewModel) {
                         viewModel.setWeightGoal(goalWeight, startWeight, startDate)
                         viewModel.saveHeight(height)
                         showSettingsDialog = false
+                    },
+                    onReset = {
+                        viewModel.resetData()
+                        showSettingsDialog = false
                     }
                 )
             }
@@ -200,11 +205,12 @@ fun MainScreen(viewModel: WeightViewModel) {
 
 @Composable
 fun OnboardingView(
-    onSaveGoal: (Double, Double, String) -> Unit,
+    onSaveGoal: (Double, Double, String, Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var goalWInput by remember { mutableStateOf("") }
     var startWInput by remember { mutableStateOf("") }
+    var heightInput by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(getCurrentDateString()) }
     var inputError by remember { mutableStateOf<String?>(null) }
 
@@ -217,7 +223,7 @@ fun OnboardingView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Welcome and Aesthetic Title card
+        // ... (Welcome Card remains the same)
         Card(
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
@@ -275,6 +281,20 @@ fun OnboardingView(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("input_goal_weight")
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Height Input
+        OutlinedTextField(
+            value = heightInput,
+            onValueChange = { heightInput = it.replace(',', '.') },
+            label = { Text("Körpergröße (cm)") },
+            placeholder = { Text("z.B. 175") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("input_height")
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -338,12 +358,15 @@ fun OnboardingView(
             onClick = {
                 val startW = startWInput.toDoubleOrNull()
                 val goalW = goalWInput.toDoubleOrNull()
+                val height = heightInput.toFloatOrNull() ?: 0f
                 if (startW == null || startW <= 0.0) {
                     inputError = "Bitte gib ein gültiges Startgewicht ein!"
                 } else if (goalW == null || goalW <= 0.0) {
                     inputError = "Bitte gib ein gültiges Wunschgewicht ein!"
+                } else if (height <= 0.0f) {
+                    inputError = "Bitte gib eine gültige Körpergröße ein!"
                 } else {
-                    onSaveGoal(goalW, startW, selectedDate)
+                    onSaveGoal(goalW, startW, selectedDate, height)
                 }
             },
             shape = RoundedCornerShape(12.dp),
@@ -999,15 +1022,63 @@ fun EditGoalDialog(
     currentGoal: WeightGoal,
     currentHeight: Float,
     onDismiss: () -> Unit,
-    onConfirmSetting: (Double, Double, String, Float) -> Unit
+    onConfirmSetting: (Double, Double, String, Float) -> Unit,
+    onReset: () -> Unit
 ) {
     var goalWInput by remember { mutableStateOf(currentGoal.goalWeight.toString()) }
     var startWInput by remember { mutableStateOf(currentGoal.startWeight.toString()) }
     var heightInput by remember { mutableStateOf(if (currentHeight > 0) currentHeight.toString() else "") }
     var selectedDate by remember { mutableStateOf(currentGoal.startDateString) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showResetConfirm by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    if (showResetConfirm) {
+        Dialog(onDismissRequest = { showResetConfirm = false }) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Daten zurücksetzen?",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Möchtest du wirklich alle Gewichtsangaben und dein Startgewicht löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        OutlinedButton(
+                            onClick = { showResetConfirm = false },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Abbrechen")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                onReset()
+                                showResetConfirm = false
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Alles löschen")
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -1122,7 +1193,21 @@ fun EditGoalDialog(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Reset Button
+                OutlinedButton(
+                    onClick = { showResetConfirm = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Alles zurücksetzen")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

@@ -115,4 +115,17 @@ class WeightViewModel(application: Application) : AndroidViewModel(application) 
         }
         return true
     }
+
+    fun resetData() {
+        viewModelScope.launch {
+            repository.clearAllData()
+            // Reset input fields
+            goalInputWeight.value = ""
+            goalInputStartWeight.value = ""
+            goalInputStartDate.value = getCurrentDateString()
+            inputWeight.value = ""
+            inputDate.value = getCurrentDateString()
+            inputNote.value = ""
+        }
+    }
 }
